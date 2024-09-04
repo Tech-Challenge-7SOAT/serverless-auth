@@ -45,35 +45,18 @@ app.get("/", async (request, response) => {
         const command = new GetCommand(params);
         const { Item } = await docClient.send(command);
         if (Item) {
-            response
-                .json(policyResponse(effects.ALLOW, request.body.methodArn));
+            response.json({ cpf: cpf });
         } else {
             response
                 .status(404)
-                .json(policyResponse(effects.DENY, request.body.methodArn));
+                .json({ error: `user not found in database with cpf ${cpf}` });
         }
     } catch (error) {
-        console.error('Error querying DynamoDB:', error);
+        console.error('error querying DynamoDB:', error);
         response
             .status(500)
-            .json(policyResponse(effects.DENY, request.body.methodArn));
+            .json({ error: 'error querying DynamoDB', message: error });
     }
 });
-
-const policyResponse = (effect, resource) => {
-    return {
-        principalId: 'user',
-        policyDocument: {
-            Version: '2012-10-17',
-            Statement: [
-                {
-                    Action: 'execute-api:Invoke',
-                    Effect: effect,
-                    Resource: resource,
-                },
-            ]
-        }
-    };
-}
 
 exports.handler = serverless(app);
