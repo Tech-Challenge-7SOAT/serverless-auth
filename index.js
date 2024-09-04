@@ -1,9 +1,48 @@
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+
+const {
+    DynamoDBDocumentClient,
+    GetCommand,
+} = require("@aws-sdk/lib-dynamodb");
+
+const express = require("express");
+const serverless = require("serverless-http");
+
+const app = express();
+
+const USERS_TABLE = process.env.USERS_TABLE;
+const client = new DynamoDBClient();
+const docClient = DynamoDBDocumentClient.from(client);
 const effects = {
     ALLOW: 'Allow',
     DENY: 'Deny'
 };
 
-const allowedUsers = ['1234', '5678'];
+app.use(express.json());
+
+app.get("/", async (request, response) => {
+    const { authorization } = request.headers || {};
+
+    const params = {
+        TableName: USERS_TABLE,
+        Key: { cpf: authorization }
+    };
+
+    try {
+        const command = new GetCommand(params);
+        const { Item } = await docClient.send(command);
+        if (Item) {
+            response.json(policyResponse(effects.ALLOW, request.body.methodArn));
+        } else {
+            response
+                .status(404)
+                .json(policyResponse(effects.DENY, request.body.methodArn));
+        }
+    } catch (error) {
+        console.log(error);
+        response.status(500).json(policyResponse(effects.DENY, request.body.methodArn));
+    }
+});
 
 const policyResponse = (effect, resource) => {
     return {
@@ -21,13 +60,4 @@ const policyResponse = (effect, resource) => {
     };
 }
 
-exports.handler = async (event) => {
-    const { headers: { authorization } } = event.headers || {};
-    const cpf = authorization?.split(' ')[1];
-
-    if (!cpfHeader || !allowedUsers.includes(cpf)) {
-        return policyResponse(effects.DENY, event.methodArn);
-    }
-
-    return policyResponse(effects.ALLOW, event.methodArn);
-}
+exports.handler = serverless(app);
