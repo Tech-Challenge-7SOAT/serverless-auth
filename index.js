@@ -32,15 +32,16 @@ app.get("/", async (request, response) => {
         const command = new GetCommand(params);
         const { Item } = await docClient.send(command);
         if (Item) {
-            response.json(policyResponse(effects.ALLOW, request.body.methodArn));
+            response
+                .json(policyResponse(effects.ALLOW, request.body.methodArn));
         } else {
             response
-                .status(404)
                 .json(policyResponse(effects.DENY, request.body.methodArn));
         }
     } catch (error) {
         console.log(error);
-        response.status(500).json(policyResponse(effects.DENY, request.body.methodArn));
+        response
+            .json(policyResponse(effects.DENY, request.body.methodArn));
     }
 });
 
