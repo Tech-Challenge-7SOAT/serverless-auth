@@ -23,8 +23,7 @@ const authMiddleware = (req, res, next) => {
     if (!authHeader) {
         return res.status(401).json({ error: 'authorization header is missing' });
     }
-    // Here you would typically validate the token
-    // For this example, we'll just pass it along
+
     req.token = authHeader;
     next();
 };
