@@ -18,14 +18,27 @@ const effects = {
     DENY: 'Deny'
 };
 
+const authMiddleware = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).json({ error: 'authorization header is missing' });
+    }
+    // Here you would typically validate the token
+    // For this example, we'll just pass it along
+    req.token = authHeader;
+    next();
+};
+
+
 app.use(express.json());
+app.use(authMiddleware);
 
 app.get("/", async (request, response) => {
-    const { authorization } = request.headers || {};
+    const cpf = request.token;
 
     const params = {
         TableName: USERS_TABLE,
-        Key: { cpf: authorization }
+        Key: { cpf: cpf }
     };
 
     try {
@@ -36,11 +49,13 @@ app.get("/", async (request, response) => {
                 .json(policyResponse(effects.ALLOW, request.body.methodArn));
         } else {
             response
+                .status(404)
                 .json(policyResponse(effects.DENY, request.body.methodArn));
         }
     } catch (error) {
-        console.log(error);
+        console.error('Error querying DynamoDB:', error);
         response
+            .status(500)
             .json(policyResponse(effects.DENY, request.body.methodArn));
     }
 });
