@@ -25,7 +25,7 @@ app.get("/", async (request, response) => {
 
   const params = {
     TableName: USERS_TABLE,
-    Key: { cpf: authorization }
+    Key: { userId: authorization }
   };
 
   try {
