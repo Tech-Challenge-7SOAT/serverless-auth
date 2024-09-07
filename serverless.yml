@@ -10,13 +10,7 @@ custom:
     role: arn:aws:iam::064151784429:role/LabRole
     disableRoleCreation: true
 
-stages:
-  default:
-    params:
-      tableName: "users-table"
-
 provider:
-  cfnRole: arn:aws:iam::064151784429:role/LabRole
   name: aws
   runtime: nodejs18.x
   lambdaHashingVersion: 20201221
@@ -24,6 +18,7 @@ provider:
     role: arn:aws:iam::064151784429:role/LabRole
   environment:
     USERS_TABLE: "users-table"
+  cfnRole: arn:aws:iam::064151784429:role/LabRole
 
 functions:
   api:
@@ -44,9 +39,7 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         TableName: "users-table"
-  EnterpriseLogAccessIamRole:
-    Condition: NeverCreate
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: DisabledRole
 
+params:
+  default:
+    tableName: users-table

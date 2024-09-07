@@ -16,7 +16,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '20'
+        node-version: '18'
 
     - name: Install dependencies
       run: npm ci
@@ -34,11 +34,7 @@ jobs:
       with:
         args: deploy
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
-        SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+        SERVERLESS_PLATFORM_VENDOR: aws
         SERVERLESS_DISABLE_AUTO_UPDATE: true
         SLS_DISABLE_AUTO_UPDATE: true
         SERVERLESS_PLATFORM_DISABLE: true
-        SERVERLESS_DISABLE_ENTERPRISE_LOGS_ACCESS: true
