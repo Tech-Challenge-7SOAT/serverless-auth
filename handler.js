@@ -10,7 +10,7 @@ const serverless = require("serverless-http");
 
 const app = express();
 
-const USERS_TABLE = "users";
+const USERS_TABLE = "users-table";
 const client = new DynamoDBClient();
 const docClient = DynamoDBDocumentClient.from(client);
 const effects = {
