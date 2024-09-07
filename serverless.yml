@@ -5,13 +5,10 @@ app: null
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: fiap-tech-auth
 
-cfnRole: false
-
 custom:
   iam:
+    role: arn:aws:iam::064151784429:role/LabRole
     disableRoleCreation: true
-  enterpriseLogAccess:
-    enabled: false
 
 stages:
   default:
@@ -19,6 +16,7 @@ stages:
       tableName: "users-table"
 
 provider:
+  cfnRole: arn:aws:iam::064151784429:role/LabRole
   name: aws
   runtime: nodejs18.x
   lambdaHashingVersion: 20201221
