@@ -12,7 +12,7 @@ stages:
 
 provider:
   name: aws
-  runtime: nodejs20.x
+  runtime: nodejs18.x
   iam:
     role: arn:aws:iam::064151784429:role/LabRole
   environment:
@@ -21,6 +21,7 @@ provider:
 functions:
   api:
     handler: handler.handler
+    role: arn:aws:iam::064151784429:role/LabRole
     events:
       - httpApi: "*"
 
