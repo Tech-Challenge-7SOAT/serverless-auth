@@ -5,6 +5,12 @@ app: fiap-tech-auth
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: fiap-tech-auth
 
+cfnRole: false
+
+custom:
+  iam:
+    disableRoleCreation: true
+
 stages:
   default:
     params:
