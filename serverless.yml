@@ -21,7 +21,19 @@ provider:
 functions:
   api:
     handler: handler.handler
-    role: arn:aws:iam::064151784429:role/LabRole
     events:
       - httpApi: "*"
 
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: "users-table"
