@@ -29,7 +29,7 @@ functions:
 Após o deploy bem-sucedido, você pode criar consultar um usuário chamando o endpoint correspondente:
 
 ```
-curl --location 'https://***.execute-api.us-east-1.amazonaws.com' --header 'authorization: 04024279041' --header
+curl --location 'https://***.execute-api.us-east-1.amazonaws.com' --header 'authorization: 04024279041'
 ```
 
 > [!NOTE]
