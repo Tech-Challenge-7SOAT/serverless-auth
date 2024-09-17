@@ -32,9 +32,10 @@ app.get("/", async (request, response) => {
   try {
     await client.connect();
 
-    const query = 'SELECT id FROM users WHERE cpf = $1';
+    const query = 'SELECT id FROM tb_customers WHERE cpf = $1';
     const result = await client.query(query, [authorization]);
 
+    console.log('Query result:', result.rows);
     if (result.rows.length === 0) {
       console.log('User not found with cpf:', authorization);
       return response.json(policyResponse(effects.DENY, request.body.methodArn));
