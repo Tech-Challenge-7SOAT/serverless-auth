@@ -1,18 +1,18 @@
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-
-const {
-  DynamoDBDocumentClient,
-  GetCommand,
-} = require("@aws-sdk/lib-dynamodb");
+const { Client } = require('pg');
 
 const express = require("express");
 const serverless = require("serverless-http");
 
 const app = express();
 
-const USERS_TABLE = "users-table";
-const client = new DynamoDBClient();
-const docClient = DynamoDBDocumentClient.from(client);
+const dbConfig = {
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+};
+
 const effects = {
   ALLOW: 'Allow',
   DENY: 'Deny'
@@ -22,26 +22,30 @@ app.use(express.json());
 
 app.get("/", async (request, response) => {
   const { authorization } = request.headers || {};
+  if (!authorization) {
+    console.log('Authorization header not found');
+    response.json(policyResponse(effects.DENY, request.body.methodArn));
+  }
 
-  const params = {
-    TableName: USERS_TABLE,
-    Key: { userId: authorization }
-  };
+  const client = new Client(dbConfig);
 
   try {
-    const command = new GetCommand(params);
-    const { Item } = await docClient.send(command);
-    if (Item) {
-      response
-        .json(policyResponse(effects.ALLOW, request.body.methodArn));
-    } else {
-      response
-        .json(policyResponse(effects.DENY, request.body.methodArn));
+    await client.connect();
+
+    const query = 'SELECT id FROM users WHERE cpf = $1';
+    const result = await client.query(query, [authorization]);
+
+    if (result.rows.length === 0) {
+      console.log('User not found with cpf:', authorization);
+      return response.json(policyResponse(effects.DENY, request.body.methodArn));
     }
+
+    return response.json(policyResponse(effects.ALLOW, request.body.methodArn));
   } catch (error) {
-    console.log(error);
-    response
-      .json(policyResponse(effects.DENY, request.body.methodArn));
+    console.error('Error executing query', error);
+    return response.json(policyResponse(effects.DENY, request.body.methodArn));
+  } finally {
+    await client.end();
   }
 });
 
