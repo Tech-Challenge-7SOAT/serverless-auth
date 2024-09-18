@@ -24,6 +24,12 @@ provider:
     DB_USER: root
     DB_PASSWORD: fiap2024
   cfnRole: arn:aws:iam::064151784429:role/LabRole
+  vpc:
+    securityGroupIds:
+      - sg-0649c80d6734b4014
+    subnetIds:
+      - subnet-09dcbe24244b8b4bb
+      - subnet-04105236c89d986f0
 
 functions:
   api:
