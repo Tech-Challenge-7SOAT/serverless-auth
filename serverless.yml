@@ -19,7 +19,7 @@ provider:
   environment:
     USERS_TABLE: "users-table"
     DB_HOST: fastfoodrds.cu9sbxolmzur.us-east-1.rds.amazonaws.com
-    DB_PORT: 3306
+    DB_PORT: 5432
     DB_NAME: mydb
     DB_USER: root
     DB_PASSWORD: fiap2024
