@@ -30,6 +30,7 @@ app.get("/", async (request, response) => {
   const client = new Client(dbConfig);
 
   try {
+    console.log('Connecting to database', dbConfig);
     await client.connect();
 
     const query = 'SELECT id FROM tb_customers WHERE cpf = $1';
