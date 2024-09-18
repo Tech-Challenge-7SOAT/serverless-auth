@@ -5,9 +5,6 @@ app: null
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: fiap-tech-auth
 
-plugins:
-  - serverless-offline
-
 custom:
   iam:
     role: arn:aws:iam::064151784429:role/LabRole
@@ -29,10 +26,10 @@ provider:
   cfnRole: arn:aws:iam::064151784429:role/LabRole
   vpc:
     securityGroupIds:
-      - sg-0649c80d6734b4014
+      - sg-0a793ba08953915f8
     subnetIds:
-      - subnet-09dcbe24244b8b4bb
-      - subnet-04105236c89d986f0
+      - subnet-00a2b882d4ff0552c
+      - subnet-09aa455ebbdd5e874
 
 functions:
   api:
