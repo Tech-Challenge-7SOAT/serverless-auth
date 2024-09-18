@@ -32,7 +32,7 @@ jobs:
     - name: Serverless Deploy
       uses: serverless/github-action@v3.2
       with:
-        args: deploy --disable-rollback
+        args: deploy
       env:
         SERVERLESS_PLATFORM_VENDOR: aws
         SERVERLESS_DISABLE_AUTO_UPDATE: true
