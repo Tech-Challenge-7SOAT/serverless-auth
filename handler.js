@@ -24,7 +24,7 @@ app.get("/", async (request, response) => {
   const { authorization } = request.headers || {};
   if (!authorization) {
     console.log('Authorization header not found');
-    response.json(policyResponse(effects.DENY, request.body.methodArn));
+    return response.json(policyResponse(effects.DENY, request.body.methodArn));
   }
 
   const client = new Client(dbConfig);
