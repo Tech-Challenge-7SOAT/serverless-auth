@@ -1,10 +1,5 @@
 const { Client } = require('pg');
 
-const express = require("express");
-const serverless = require("serverless-http");
-
-const app = express();
-
 const dbConfig = {
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
@@ -18,13 +13,25 @@ const effects = {
   DENY: 'Deny'
 };
 
-app.use(express.json());
+const policyResponse = (effect, resource) => {
+  return {
+    principalId: 'user',
+    policyDocument: {
+      Version: '2012-10-17',
+      Statement: [{
+        Action: 'execute-api:Invoke',
+        Effect: effect,
+        Resource: resource
+      }]
+    }
+  };
+}
 
-app.get("/", async (request, response) => {
-  const { authorization } = request.headers || {};
-  if (!authorization) {
-    console.log('Authorization header not found');
-    return response.json(policyResponse(effects.DENY, request.body.methodArn));
+exports.handler = async (event, context) => {
+  const { authorizationToken, methodArn } = event;
+  if (!authorizationToken) {
+    console.log('Authorization token not found');
+    return policyResponse(effects.DENY, methodArn);
   }
 
   const client = new Client(dbConfig);
@@ -34,37 +41,19 @@ app.get("/", async (request, response) => {
     await client.connect();
 
     const query = 'SELECT id FROM tb_customers WHERE cpf = $1';
-    const result = await client.query(query, [authorization]);
+    const result = await client.query(query, [authorizationToken]);
 
     console.log('Query result:', result.rows);
     if (result.rows.length === 0) {
-      console.log('User not found with cpf:', authorization);
-      return response.json(policyResponse(effects.DENY, request.body.methodArn));
+      console.log('User not found with cpf:', authorizationToken);
+      return policyResponse(effects.DENY, methodArn);
     }
 
-    return response.json(policyResponse(effects.ALLOW, request.body.methodArn));
+    return policyResponse(effects.ALLOW, methodArn);
   } catch (error) {
     console.error('Error executing query', error);
-    return response.json(policyResponse(effects.DENY, request.body.methodArn));
+    return policyResponse(effects.DENY, methodArn);
   } finally {
     await client.end();
   }
-});
-
-const policyResponse = (effect, resource) => {
-  return {
-    principalId: 'user',
-    policyDocument: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Action: 'execute-api:Invoke',
-          Effect: effect,
-          Resource: resource,
-        },
-      ]
-    }
-  };
 }
-
-exports.handler = serverless(app);
