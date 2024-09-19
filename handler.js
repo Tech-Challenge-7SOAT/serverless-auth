@@ -1,16 +1,6 @@
 const { Client } = require('pg');
 const { getSecrets } = require('./secrets');
 
-const dbSecrets = await getSecrets();
-
-const dbConfig = {
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-};
-
 const effects = {
   ALLOW: 'Allow',
   DENY: 'Deny'
@@ -30,12 +20,27 @@ const policyResponse = (effect, resource) => {
   };
 }
 
+const getDatabaseSecrets = async () => {
+  const secrets = await getSecrets();
+  const { host, port, dbName, user, password } = JSON.parse(secrets);
+  return {
+    host,
+    port,
+    password,
+    username: user,
+    database: dbName
+  };
+}
+
 exports.handler = async (event, context) => {
   const { authorization, methodArn } = event;
   if (!authorization) {
     console.log('Authorization token not found');
     return policyResponse(effects.DENY, methodArn);
   }
+
+  const dbConfig = await getDatabaseSecrets();
+  console.log('Database configuration:', dbConfig);
 
   const client = new Client(dbConfig);
 
