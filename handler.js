@@ -1,4 +1,7 @@
 const { Client } = require('pg');
+const { getSecrets } = require('./secrets');
+
+const dbSecrets = await getSecrets();
 
 const dbConfig = {
   host: process.env.DB_HOST,

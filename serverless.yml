@@ -17,16 +17,20 @@ provider:
   name: aws
   runtime: nodejs18.x
   lambdaHashingVersion: 20201221
+  cfnRole: arn:aws:iam::064151784429:role/LabRole
   iam:
     role: arn:aws:iam::064151784429:role/LabRole
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - secretsmanager:GetSecretValue
+      Resource: arn:aws:secretsmanager:us-east-1:064151784429:secret:serverless-auth-gLNj9X
   environment:
-    USERS_TABLE: "users-table"
     DB_HOST: fastfoodrds.cu9sbxolmzur.us-east-1.rds.amazonaws.com
     DB_PORT: 5432
     DB_NAME: mydb
     DB_USER: root
     DB_PASSWORD: fiap2024
-  cfnRole: arn:aws:iam::064151784429:role/LabRole
   vpc:
     securityGroupIds:
       - sg-0a793ba08953915f8
