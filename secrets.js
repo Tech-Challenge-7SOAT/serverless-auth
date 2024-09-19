@@ -8,6 +8,7 @@ const client = new SecretsManagerClient({
 
 exports.getSecrets = async () => {
   try {
+    console.log('getting secret:', secret_name);
     const response = await client.send(
       new GetSecretValueCommand({
         SecretId: secret_name,
