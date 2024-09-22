@@ -33,7 +33,8 @@ const getDatabaseSecrets = async () => {
 }
 
 exports.handler = async (event, context) => {
-  const { authorization, methodArn } = event;
+  const { methodArn } = event;
+  const { authorization } = event.headers;
   if (!authorization) {
     console.log('Authorization token not found');
     return policyResponse(effects.DENY, methodArn);
