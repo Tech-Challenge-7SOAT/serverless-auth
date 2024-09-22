@@ -7,6 +7,15 @@ const effects = {
 };
 
 const policyResponse = (effect, resource, context = {}) => {
+  let statusCode;
+  if (effect === effects.ALLOW) {
+    statusCode = 200;
+  } else if (effect === effects.DENY) {
+    statusCode = 403;
+  } else {
+    statusCode = 500;
+  }
+
   return {
     principalId: 'user',
     policyDocument: {
@@ -17,7 +26,7 @@ const policyResponse = (effect, resource, context = {}) => {
         Resource: resource
       }],
     },
-    context: context
+    context: { status: statusCode, ...context }
   };
 }
 
