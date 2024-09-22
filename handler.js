@@ -6,7 +6,7 @@ const effects = {
   DENY: 'Deny'
 };
 
-const policyResponse = (effect, resource) => {
+const policyResponse = (effect, resource, context = {}) => {
   return {
     principalId: 'user',
     policyDocument: {
@@ -15,8 +15,9 @@ const policyResponse = (effect, resource) => {
         Action: 'execute-api:Invoke',
         Effect: effect,
         Resource: resource
-      }]
-    }
+      }],
+    },
+    context: context
   };
 }
 
@@ -34,10 +35,16 @@ const getDatabaseSecrets = async () => {
 
 exports.handler = async (event, context) => {
   const { methodArn } = event;
-  const { authorization } = event.headers;
-  if (!authorization) {
-    console.log('Authorization token not found');
-    return policyResponse(effects.DENY, methodArn);
+  const { role, cpf } = event.headers;
+
+  if (!cpf) {
+    console.log('Guest role detected');
+    return policyResponse(effects.ALLOW, methodArn, { role: 'guest' });
+  }
+
+  if (role === 'admin') {
+    console.log('Admin role detected');
+    return policyResponse(effects.ALLOW, methodArn, { role: 'admin' });
   }
 
   const dbConfig = await getDatabaseSecrets();
@@ -49,15 +56,15 @@ exports.handler = async (event, context) => {
     await client.connect();
 
     const query = 'SELECT id FROM tb_customers WHERE cpf = $1';
-    const result = await client.query(query, [authorization]);
+    const result = await client.query(query, [cpf]);
 
     console.log('Query result:', result.rows);
     if (result.rows.length === 0) {
-      console.log('User not found with cpf:', authorization);
+      console.log('User not found with cpf:', cpf);
       return policyResponse(effects.DENY, methodArn);
     }
 
-    return policyResponse(effects.ALLOW, methodArn);
+    return policyResponse(effects.ALLOW, methodArn, { role: 'customer' });
   } catch (error) {
     console.error('Error executing query', error);
     return policyResponse(effects.DENY, methodArn);
