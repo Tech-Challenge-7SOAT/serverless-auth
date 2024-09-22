@@ -32,7 +32,7 @@ const policyResponse = (effect, resource, context = {}) => {
 
 const getDatabaseSecrets = async () => {
   // const secrets = await getSecrets();
-  const { host, port, dbName, user, password } = JSON.parse(secrets);
+  // const { host, port, dbName, user, password } = JSON.parse(secrets);
   return {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -46,14 +46,14 @@ exports.handler = async (event, context) => {
   const { methodArn } = event;
   const { role, cpf } = event.headers;
 
-  if (!cpf) {
-    console.log('Guest role detected');
-    return policyResponse(effects.ALLOW, methodArn, { role: 'guest' });
-  }
-
   if (role === 'admin') {
     console.log('Admin role detected');
     return policyResponse(effects.ALLOW, methodArn, { role: 'admin' });
+  }
+
+  if (!cpf) {
+    console.log('Guest role detected');
+    return policyResponse(effects.ALLOW, methodArn, { role: 'guest' });
   }
 
   const dbConfig = await getDatabaseSecrets();
