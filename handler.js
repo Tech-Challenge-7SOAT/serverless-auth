@@ -21,14 +21,14 @@ const policyResponse = (effect, resource) => {
 }
 
 const getDatabaseSecrets = async () => {
-  const secrets = await getSecrets();
+  // const secrets = await getSecrets();
   const { host, port, dbName, user, password } = JSON.parse(secrets);
   return {
-    host,
-    port,
-    password,
-    username: user,
-    database: dbName
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    database: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
   };
 }
 
