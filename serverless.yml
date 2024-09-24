@@ -34,10 +34,10 @@ provider:
     DB_PASSWORD: fiap2024
   vpc:
     securityGroupIds:
-      - sg-0a793ba08953915f8
+      - sg-076e031d1838d8141
     subnetIds:
-      - subnet-00a2b882d4ff0552c
-      - subnet-09aa455ebbdd5e874
+      - subnet-011a7518dbd54cc5d
+      - subnet-08b16b62c14ee38c5
 
 functions:
   api:
