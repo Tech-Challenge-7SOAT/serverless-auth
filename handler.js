@@ -41,6 +41,7 @@ const getDatabaseSecrets = async () => {
 }
 
 exports.handler = async (event, context) => {
+  console.log('Event', event, 'Context', context, 'Timestamp', Date.now());
   const { methodArn } = event;
   const { role, cpf } = event.headers;
 
