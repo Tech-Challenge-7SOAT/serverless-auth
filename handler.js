@@ -26,7 +26,7 @@ const policyResponse = (effect, resource, context = {}) => {
         Resource: resource
       }],
     },
-    context: { status: statusCode, ...context }
+    context: { statusCode: statusCode, ...context }
   };
 }
 
