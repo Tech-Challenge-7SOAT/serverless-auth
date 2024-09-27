@@ -68,7 +68,7 @@ exports.handler = async (event, context) => {
       return policyResponse(effects.ALLOW, methodArn, { role: 'admin' });
     }
 
-    const query = 'SELECT id, role FROM tb_customers WHERE cpf = $1';
+    const query = 'SELECT id FROM tb_customers WHERE cpf = $1';
     const result = await client.query(query, [cpf]);
 
     console.log('Query result:', result.rows);
