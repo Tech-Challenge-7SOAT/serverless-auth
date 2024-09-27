@@ -55,17 +55,7 @@ exports.handler = async (event, context) => {
       return policyResponse(effects.ALLOW, methodArn, { role: 'guest' });
     }
 
-    const query = 'SELECT id, role FROM tb_customers WHERE cpf = $1';
-    const result = await client.query(query, [cpf]);
-
-    console.log('Query result:', result.rows);
-    if (result.rows.length === 0) {
-      console.log('User not found with cpf:', cpf);
-      return policyResponse(effects.DENY, methodArn);
-    }
-
-    const userRole = result.rows[0].role;
-    if (userRole === 'admin') {
+    if (role === 'admin') {
       const adminQuery = 'SELECT cpf FROM tb_role_admin WHERE cpf = $1';
       const adminResult = await client.query(adminQuery, [cpf]);
 
@@ -76,6 +66,15 @@ exports.handler = async (event, context) => {
 
       console.log('Admin role detected');
       return policyResponse(effects.ALLOW, methodArn, { role: 'admin' });
+    }
+
+    const query = 'SELECT id, role FROM tb_customers WHERE cpf = $1';
+    const result = await client.query(query, [cpf]);
+
+    console.log('Query result:', result.rows);
+    if (result.rows.length === 0) {
+      console.log('User not found with cpf:', cpf);
+      return policyResponse(effects.DENY, methodArn);
     }
 
     return policyResponse(effects.ALLOW, methodArn, { role: 'guest' });
