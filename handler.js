@@ -10,9 +10,12 @@ const policyResponse = (effect, resource, context = {}) => {
   let statusCode;
   if (effect === effects.ALLOW) {
     statusCode = 200;
-  } else (effect === effects.DENY) {
+  } else if (effect === effects.DENY) {
     statusCode = 403;
   }
+    } else {
+      statusCode = 403;
+    }
 
   return {
     principalId: 'user',
