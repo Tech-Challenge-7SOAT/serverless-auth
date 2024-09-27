@@ -47,42 +47,42 @@ exports.handler = async (event, context) => {
   const dbConfig = await getDatabaseSecrets();
   const client = new Client(dbConfig);
 
-try {
-  await client.connect();
+  try {
+    await client.connect();
 
-  if (!cpf) {
-    console.log('Guest role detected');
-    return policyResponse(effects.ALLOW, methodArn, { role: 'guest' });
-  }
+    if (!cpf) {
+      console.log('Guest role detected');
+      return policyResponse(effects.ALLOW, methodArn, { role: 'guest' });
+    }
 
-  const query = 'SELECT id, role FROM tb_customers WHERE cpf = $1';
-  const result = await client.query(query, [cpf]);
+    const query = 'SELECT id, role FROM tb_customers WHERE cpf = $1';
+    const result = await client.query(query, [cpf]);
 
-  console.log('Query result:', result.rows);
-  if (result.rows.length === 0) {
-    console.log('User not found with cpf:', cpf);
-    return policyResponse(effects.DENY, methodArn);
-  }
-
-  const userRole = result.rows[0].role;
-
-  if (role === 'admin') {
-    const adminQuery = 'SELECT cpf FROM tb_role_admin WHERE cpf = $1';
-    const adminResult = await client.query(adminQuery, [cpf]);
-
-    if (adminResult.rows.length === 0) {
-      console.log('This user is not a admin', cpf);
+    console.log('Query result:', result.rows);
+    if (result.rows.length === 0) {
+      console.log('User not found with cpf:', cpf);
       return policyResponse(effects.DENY, methodArn);
     }
 
-    console.log('Admin role detected');
-    return policyResponse(effects.ALLOW, methodArn, { role: 'admin' });
-  }
+    const userRole = result.rows[0].role;
+    if (userRole === 'admin') {
+      const adminQuery = 'SELECT cpf FROM tb_role_admin WHERE cpf = $1';
+      const adminResult = await client.query(adminQuery, [cpf]);
 
-  return policyResponse(effects.ALLOW, methodArn, { role: 'guest' });
-} catch (error) {
-  console.error('Error executing query', error);
-  return policyResponse(effects.DENY, methodArn);
-} finally {
-  await client.end();
+      if (adminResult.rows.length === 0) {
+        console.log('This user is not a admin', cpf);
+        return policyResponse(effects.DENY, methodArn);
+      }
+
+      console.log('Admin role detected');
+      return policyResponse(effects.ALLOW, methodArn, { role: 'admin' });
+    }
+
+    return policyResponse(effects.ALLOW, methodArn, { role: 'guest' });
+  } catch (error) {
+    console.error('Error executing query', error);
+    return policyResponse(effects.DENY, methodArn);
+  } finally {
+    await client.end();
+  }
 }
