@@ -10,10 +10,8 @@ const policyResponse = (effect, resource, context = {}) => {
   let statusCode;
   if (effect === effects.ALLOW) {
     statusCode = 200;
-  } else if (effect === effects.DENY) {
+  } else (effect === effects.DENY) {
     statusCode = 403;
-  } else {
-    statusCode = 500;
   }
 
   return {
@@ -31,8 +29,6 @@ const policyResponse = (effect, resource, context = {}) => {
 }
 
 const getDatabaseSecrets = async () => {
-  // const secrets = await getSecrets();
-  // const { host, port, dbName, user, password } = JSON.parse(secrets);
   return {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -46,38 +42,45 @@ exports.handler = async (event, context) => {
   const { methodArn } = event;
   const { role, cpf } = event.headers;
 
-  if (role === 'admin') {
-    console.log('Admin role detected');
-    return policyResponse(effects.ALLOW, methodArn, { role: 'admin' });
-  }
+  const dbConfig = await getDatabaseSecrets();
+  const client = new Client(dbConfig);
+
+try {
+  await client.connect();
 
   if (!cpf) {
     console.log('Guest role detected');
     return policyResponse(effects.ALLOW, methodArn, { role: 'guest' });
   }
 
-  const dbConfig = await getDatabaseSecrets();
-  console.log('Database configuration:', dbConfig);
+  const query = 'SELECT id, role FROM tb_customers WHERE cpf = $1';
+  const result = await client.query(query, [cpf]);
 
-  const client = new Client(dbConfig);
+  console.log('Query result:', result.rows);
+  if (result.rows.length === 0) {
+    console.log('User not found with cpf:', cpf);
+    return policyResponse(effects.DENY, methodArn);
+  }
 
-  try {
-    await client.connect();
+  const userRole = result.rows[0].role;
 
-    const query = 'SELECT id FROM tb_customers WHERE cpf = $1';
-    const result = await client.query(query, [cpf]);
+  if (role === 'admin') {
+    const adminQuery = 'SELECT cpf FROM tb_role_admin WHERE cpf = $1';
+    const adminResult = await client.query(adminQuery, [cpf]);
 
-    console.log('Query result:', result.rows);
-    if (result.rows.length === 0) {
-      console.log('User not found with cpf:', cpf);
+    if (adminResult.rows.length === 0) {
+      console.log('This user is not a admin', cpf);
       return policyResponse(effects.DENY, methodArn);
     }
 
-    return policyResponse(effects.ALLOW, methodArn, { role: 'customer' });
-  } catch (error) {
-    console.error('Error executing query', error);
-    return policyResponse(effects.DENY, methodArn);
-  } finally {
-    await client.end();
+    console.log('Admin role detected');
+    return policyResponse(effects.ALLOW, methodArn, { role: 'admin' });
   }
+
+  return policyResponse(effects.ALLOW, methodArn, { role: 'guest' });
+} catch (error) {
+  console.error('Error executing query', error);
+  return policyResponse(effects.DENY, methodArn);
+} finally {
+  await client.end();
 }
