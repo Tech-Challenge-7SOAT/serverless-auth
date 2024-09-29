@@ -32,8 +32,14 @@ Após o deploy bem-sucedido, você pode criar consultar um usuário chamando o e
 curl --location 'https://***.execute-api.us-east-1.amazonaws.com' --header 'cpf: xxx' --header 'role: xxx'
 ```
 
+### Cabeçalho das requisições
+
+- cpf (string)
+- role (string ou undefined)
+
 > [!NOTE]
 > A chave `cpf` deve conter apenas o CPF do usuario
+> A chave `role` não é obrigatória, para definir se um usuario é admistrador a chave deve contar a palavra `admin`
 
 O que deve resultar na seguinte resposta:
 
