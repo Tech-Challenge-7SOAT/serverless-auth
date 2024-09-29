@@ -29,11 +29,11 @@ functions:
 Após o deploy bem-sucedido, você pode criar consultar um usuário chamando o endpoint correspondente:
 
 ```
-curl --location 'https://***.execute-api.us-east-1.amazonaws.com' --header 'authorization: 04024279041'
+curl --location 'https://***.execute-api.us-east-1.amazonaws.com' --header 'cpf: xxx' --header 'role: xxx'
 ```
 
 > [!NOTE]
-> A chave `authorization` deve conter apenas o CPF do usuario
+> A chave `cpf` deve conter apenas o CPF do usuario
 
 O que deve resultar na seguinte resposta:
 
